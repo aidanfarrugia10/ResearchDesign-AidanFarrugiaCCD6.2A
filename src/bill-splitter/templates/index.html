@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Scanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .upload-box {
+            width: 80%;
+            height: 300px;
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .upload-box p {
+            font-size: 1.2em;
+            color: #007bff;
+        }
+
+        .rounded-bubble {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-block;
+            text-align: center;
+            color: white;
+            margin: 5px;
+            line-height: 35px;
+        }
+
+        .line-item {
+            margin-bottom: 20px;
+        }
+
+        .item-name,
+        .item-price {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 class="text-center my-5">Receipt Scanner and Bill Splitter</h1>
+
+        <div class="upload-box" id="upload-box">
+            <p>Drag & Drop Receipt Here or Click to Upload</p>
+            <input type="file" id="file-upload" class="d-none" accept="image/*">
+        </div>
+
+        <div class="line-items">
+    
+        </div>
+
+        <div class="text-center">
+            <button id="scan-btn" class="btn btn-primary">Scan Receipt</button>
+        </div>
+    </div>
+
+    <script>
+        const uploadBox = document.getElementById('upload-box');
+        const fileInput = document.getElementById('file-upload');
+        const scanBtn = document.getElementById('scan-btn');
+
+
+        uploadBox.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+    
+        fileInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadBox.innerHTML = `<p>${file.name}</p>`;
+            }
+        });
+
+        uploadBox.addEventListener('dragover', function (event) {
+            event.preventDefault();
+            uploadBox.style.backgroundColor = "#f0f8ff";
+        });
+
+        uploadBox.addEventListener('dragleave', function () {
+            uploadBox.style.backgroundColor = "#ffffff";
+        });
+
+        uploadBox.addEventListener('drop', function (event) {
+            event.preventDefault();
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                uploadBox.innerHTML = `<p>${file.name}</p>`;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
