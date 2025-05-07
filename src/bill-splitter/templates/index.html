@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,26 +15,23 @@
         }
 
         .upload-box {
-            width: 100%;
             max-width: 500px;
-            height: 320px;
-            border: 2px dashed #6c63ff;
-            border-radius: 20px;
             margin: 40px auto;
             padding: 30px;
-            background-color: #ffffff;
+            background: #fff;
+            border: 2px dashed #6c63ff;
+            border-radius: 20px;
             text-align: center;
             color: #666;
-            position: relative;
         }
 
         .upload-box img {
             width: 64px;
-            margin-bottom: 20px;
             opacity: 0.6;
+            margin-bottom: 20px;
         }
 
-        .upload-box input[type="file"] {
+        .upload-box input {
             display: none;
         }
 
@@ -44,38 +42,115 @@
             border-bottom: 1px dotted #6c63ff;
         }
 
+        .results-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            max-width: 1000px;
+            margin: 40px auto;
+            gap: 2rem;
+        }
+
         .receipt-table-section {
+            flex: 1 1 60%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
             display: none;
-            margin: 50px auto;
-            max-width: 900px;
         }
 
         .receipt-table {
             width: 100%;
             border-collapse: collapse;
-            background-color: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
         }
 
         .receipt-table th,
         .receipt-table td {
-            padding: 16px;
+            padding: 10px;
             border-bottom: 1px solid #eee;
             text-align: left;
+            font-size: 14px;
+            vertical-align: top;
         }
 
         .receipt-table th {
-            background-color: #f2f2f2;
-            color: #444;
+            background: #f2f2f2;
         }
 
         .receipt-total {
             text-align: right;
-            font-size: 18px;
             font-weight: 600;
-            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .user-panel {
+            flex: 1 1 30%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+            display: none;
+        }
+
+        .user-bubbles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .bubble {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            position: relative;
+        }
+
+        .bubble.trashable:hover::after {
+            content: '🗑';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 14px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 2px;
+            cursor: pointer;
+        }
+
+        .user-totals {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .scan-another-btn {
+            text-align: center;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .scan-another-btn button {
+            background: #dc3545;
+            border: none;
+            color: #fff;
+            font-weight: 500;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .assigned-users {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            min-height: 40px;
         }
 
         #cropper-popup {
@@ -83,7 +158,7 @@
             top: 20%;
             left: 50%;
             transform: translateX(-50%);
-            background-color: white;
+            background: white;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             display: none;
@@ -96,40 +171,62 @@
             object-fit: contain;
             margin-top: 10px;
         }
+
+        @media screen and (max-width: 768px) {
+            .results-wrapper {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .receipt-table-section,
+            .user-panel {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="upload-box" id="upload-box">
         <label for="file-upload">
-            <img src="images/upload.png" alt="Upload Icon" />
+            <img src="{{ url_for('static', filename='images/Mainicon.png') }}" alt="Upload Icon" />
             <div>Drag & drop an image or <span class="upload-label">browse</span></div>
         </label>
         <input id="file-upload" type="file" name="receipt" accept="image/*" />
     </div>
 
-    <div class="receipt-table-section" id="line-items">
-        <table class="receipt-table">
-            <thead>
-                <tr>
-                    <th>Qty</th>
-                    <th>Item</th>
-                    <th>Unit Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody id="item-list">
-            </tbody>
-        </table>
-        <div class="receipt-total">
-            Total Amount: <span id="total-amount"></span>
+    <div class="results-wrapper">
+        <div class="receipt-table-section" id="line-items">
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th>Qty</th>
+                        <th>Item</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                        <th>Assigned</th>
+                    </tr>
+                </thead>
+                <tbody id="item-list"></tbody>
+            </table>
+            <div class="receipt-total">Total Amount: <span id="total-amount"></span></div>
         </div>
+
+        <div class="user-panel" id="user-panel">
+            <h5>Assign Users</h5>
+            <div class="user-bubbles" id="user-bubbles"></div>
+            <div class="user-totals" id="user-totals"></div>
+        </div>
+    </div>
+
+    <div class="scan-another-btn" id="scan-again">
+        <button onclick="window.location.reload()">Scan Another Receipt</button>
     </div>
 
     <div id="cropper-popup">
         <div class="text-center">
             <h4>Crop the Image to Focus on Food Items</h4>
-            <img id="uploaded-image" src="" class="uploaded-image" alt="Uploaded Image" />
+            <img id="uploaded-image" class="uploaded-image" alt="Uploaded Image" />
             <button id="crop-button" class="btn btn-success mt-3">Crop and Continue</button>
         </div>
     </div>
@@ -137,6 +234,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
         let cropper;
+        const colors = ['#e74c3c', '#3498db', '#27ae60', '#9b59b6', '#e67e22', '#1abc9c', '#f39c12'];
+        const users = {};
+        const assignments = {};
         const fileInput = document.getElementById('file-upload');
         const uploadBox = document.getElementById('upload-box');
         const cropButton = document.getElementById('crop-button');
@@ -144,83 +244,139 @@
         const itemList = document.getElementById('item-list');
         const totalAmount = document.getElementById('total-amount');
         const lineItemsSection = document.getElementById('line-items');
+        const userPanel = document.getElementById('user-panel');
+        const userBubbles = document.getElementById('user-bubbles');
+        const userTotals = document.getElementById('user-totals');
+        const scanAgainBtn = document.getElementById('scan-again');
 
-        uploadBox.addEventListener('dragover', e => {
-            e.preventDefault();
-            uploadBox.classList.add('dragover');
-        });
-
-        uploadBox.addEventListener('dragleave', e => {
-            uploadBox.classList.remove('dragover');
-        });
-
-        uploadBox.addEventListener('drop', e => {
-            e.preventDefault();
-            uploadBox.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            fileInput.files = e.dataTransfer.files;
-            previewImage(file);
-        });
-
-        fileInput.addEventListener('change', e => {
-            const file = e.target.files[0];
-            previewImage(file);
-        });
-
-        function previewImage(file) {
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const imageUrl = event.target.result;
-                uploadedImage.src = imageUrl;
-                document.getElementById('cropper-popup').style.display = 'block';
-
-                if (cropper) cropper.destroy();
-
-                cropper = new Cropper(uploadedImage, {
-                    aspectRatio: NaN,
-                    viewMode: 1,
-                    autoCropArea: 0.8,
-                    scalable: true,
-                    zoomable: true
-                });
-            };
-            reader.readAsDataURL(file);
+        function getUniqueColor() {
+            const used = Object.values(users).map(u => u.color);
+            const available = colors.filter(c => !used.includes(c));
+            return available.length ? available[Math.floor(Math.random() * available.length)] : '#' + Math.floor(Math.random() * 16777215).toString(16);
         }
 
-       cropButton.addEventListener('click', function () {
-            const croppedImage = cropper.getCroppedCanvas().toDataURL('image/png');
+        function updateUserTotals() {
+            for (const user in users) users[user].total = 0;
+            for (const [index, assigned] of Object.entries(assignments)) {
+                const itemTotal = parseFloat(document.querySelector(`#item-${index}`).dataset.total);
+                const share = itemTotal / assigned.length;
+                assigned.forEach(u => users[u].total += share);
+            }
+            userTotals.innerHTML = '';
+            for (const [user, data] of Object.entries(users)) {
+                const div = document.createElement('div');
+                div.textContent = `${user}: $${data.total.toFixed(2)}`;
+                userTotals.appendChild(div);
+            }
+        }
 
-            fetch('/process-cropped-image', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: croppedImage })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    displayResults(data.items, data.total);
-                    uploadBox.style.display = 'none'; 
-                })
-                .catch(error => console.error('Error:', error));
+        function createBubble(name) {
+            const initials = name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+            const color = users[name].color;
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.style.backgroundColor = color;
+            bubble.textContent = initials;
+            bubble.dataset.user = name;
+            bubble.setAttribute('draggable', true);
+            bubble.addEventListener('dragstart', e => e.dataTransfer.setData("user", name));
+            return bubble;
+        }
 
-            document.getElementById('cropper-popup').style.display = 'none';
-        });
+        function addUser(name) {
+            users[name] = { color: getUniqueColor(), total: 0 };
+            const newBubble = createBubble(name);
+            userBubbles.insertBefore(newBubble, userBubbles.querySelector('.bubble.plus'));
+            updateUserTotals();
+        }
 
+        function addAssignment(index, user) {
+            if (!assignments[index]) assignments[index] = [];
+            if (!assignments[index].includes(user)) {
+                assignments[index].push(user);
+                const cell = document.querySelector(`#assigned-${index}`);
+                const b = createBubble(user);
+                b.classList.add("trashable");
+                b.addEventListener("click", () => {
+                    assignments[index] = assignments[index].filter(u => u !== user);
+                    b.remove();
+                    updateUserTotals();
+                });
+                cell.appendChild(b);
+                updateUserTotals();
+            }
+        }
 
         function displayResults(items, total) {
             itemList.innerHTML = '';
-            items.forEach(item => {
+            items.forEach((item, i) => {
                 const row = document.createElement('tr');
+                row.id = `item-${i}`;
+                row.dataset.total = item.total;
                 row.innerHTML = `
           <td>${item.quantity}</td>
           <td>${item.name}</td>
           <td>$${item.amount.toFixed(2)}</td>
           <td>$${item.total.toFixed(2)}</td>
+          <td id="assigned-${i}" class="assigned-users" ondragover="event.preventDefault()" ondrop="addAssignment(${i}, event.dataTransfer.getData('user'))"></td>
         `;
                 itemList.appendChild(row);
             });
             totalAmount.textContent = `$${total.toFixed(2)}`;
             lineItemsSection.style.display = 'block';
+            userPanel.style.display = 'block';
+            scanAgainBtn.style.display = 'block';
+            uploadBox.style.display = 'none';
         }
+
+        function previewImage(file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                uploadedImage.src = e.target.result;
+                document.getElementById('cropper-popup').style.display = 'block';
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(uploadedImage, {
+                    aspectRatio: NaN, viewMode: 1, autoCropArea: 0.8, scalable: true, zoomable: true
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        cropButton.addEventListener('click', () => {
+            const croppedImage = cropper.getCroppedCanvas().toDataURL('image/png');
+            fetch('/process-cropped-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: croppedImage })
+            })
+                .then(res => res.json())
+                .then(data => displayResults(data.items, data.total))
+                .catch(err => console.error('Error:', err));
+            document.getElementById('cropper-popup').style.display = 'none';
+        });
+
+        fileInput.addEventListener('change', e => previewImage(e.target.files[0]));
+        uploadBox.addEventListener('dragover', e => e.preventDefault());
+        uploadBox.addEventListener('drop', e => {
+            e.preventDefault();
+            fileInput.files = e.dataTransfer.files;
+            previewImage(e.dataTransfer.files[0]);
+        });
+
+        function initUsers() {
+            addUser("ME");
+            const plus = document.createElement('div');
+            plus.className = 'bubble plus';
+            plus.textContent = '+';
+            plus.style.backgroundColor = '#999';
+            plus.addEventListener('click', () => {
+                const name = prompt("Enter full name:");
+                if (name && !users[name]) addUser(name);
+            });
+            userBubbles.appendChild(plus);
+        }
+
+        initUsers();
     </script>
 </body>
 
