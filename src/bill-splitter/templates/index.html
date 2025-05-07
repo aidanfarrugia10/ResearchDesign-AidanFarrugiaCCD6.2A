@@ -6,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receipt Scanner</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-
     <style>
         .upload-box {
             width: 80%;
@@ -21,6 +19,7 @@
             text-align: center;
             font-size: 18px;
             color: #aaa;
+            margin-top: 20px;
         }
 
         .uploaded-image {
@@ -30,7 +29,24 @@
             margin-top: 20px;
         }
 
+        #cropper-popup {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        #line-items {
+            display: none;
+            margin-top: 20px;
+        }
+
         #cropped-result {
+            display: none;
             margin-top: 20px;
         }
     </style>
@@ -39,36 +55,46 @@
 <body>
     <div class="container mt-5">
         <h2 class="text-center">Receipt Scanner</h2>
-        <form action="/" method="POST" enctype="multipart/form-data">
-            <div class="upload-box" id="upload-box">
-                Drag and drop an image or <input type="file" name="receipt" accept="image/*" required>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">Scan Receipt</button>
-        </form>
 
-        {% if text %}
-        <div class="mt-4">
-            <h4>Extracted Text:</h4>
-            <pre>{{ text }}</pre>
+        <div id="upload-box" class="upload-box">
+            Drag and drop an image or <input type="file" name="receipt" accept="image/*">
         </div>
-        {% endif %}
 
-        <div id="image-container" class="mt-4" style="display: none;">
-            <h4>Crop the image to focus on food items</h4>
+
+        <div id="cropped-result" style="display: none;">
+            <h4>Extracted Text from Cropped Image:</h4>
+            <pre id="extracted-text"></pre>
+        </div>
+
+        <div id="line-items" style="display: none;">
+            <h4>Line Items:</h4>
+            <ul id="item-list"></ul>
+            <h5>Total Amount: <span id="total-amount"></span></h5>
+        </div>
+    </div>
+
+    <div id="cropper-popup">
+        <div class="text-center">
+            <h4>Crop the Image to Focus on Food Items</h4>
             <img id="uploaded-image" src="" class="uploaded-image" alt="Uploaded Image">
+            <button id="crop-button" class="btn btn-success mt-3">Crop and Continue</button>
         </div>
-
-        <div id="cropped-result"></div>
     </div>
 
     <script>
         let cropper;
-
-        const uploadBox = document.getElementById('upload-box');
-        const imageContainer = document.getElementById('image-container');
-        const uploadedImage = document.getElementById('uploaded-image');
         const fileInput = document.querySelector('input[type="file"]');
+        const uploadBox = document.getElementById('upload-box');
+        const cropButton = document.getElementById('crop-button');
+        const uploadedImage = document.getElementById('uploaded-image');
+        const imageContainer = document.getElementById('image-container');
+        const croppedResult = document.getElementById('cropped-result');
+        const extractedTextElement = document.getElementById('extracted-text');
+        const lineItemsSection = document.getElementById('line-items');
+        const itemList = document.getElementById('item-list');
+        const totalAmount = document.getElementById('total-amount');
 
+        // Image upload and drag functionality
         uploadBox.addEventListener('dragover', function (event) {
             event.preventDefault();
             uploadBox.classList.add('dragover');
@@ -97,7 +123,7 @@
                 const imageUrl = event.target.result;
                 uploadedImage.src = imageUrl;
 
-                imageContainer.style.display = 'block';
+                document.getElementById('cropper-popup').style.display = 'block';
 
                 if (cropper) {
                     cropper.destroy();
@@ -114,20 +140,46 @@
             reader.readAsDataURL(file);
         }
 
-        // Get the cropped image data
         function getCroppedImage() {
             const croppedCanvas = cropper.getCroppedCanvas();
-            const croppedDataUrl = croppedCanvas.toDataURL('image/png');
-            document.getElementById('cropped-result').innerHTML = `<img src="${croppedDataUrl}" class="uploaded-image">`;
-            return croppedDataUrl; 
+            return croppedCanvas.toDataURL('image/png'); 
         }
 
-
-        function processCroppedImage() {
+        cropButton.addEventListener('click', function () {
             const croppedImage = getCroppedImage();
-            console.log('Cropped Image:', croppedImage);
+
+            fetch('/process-cropped-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: croppedImage })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    showLineItems(data.items, data.total);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+            document.getElementById('cropper-popup').style.display = 'none';
+            croppedResult.style.display = 'block'; 
+        });
+
+        function showLineItems(items, total) {
+            itemList.innerHTML = ''; 
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                itemList.appendChild(li);
+            });
+            totalAmount.textContent = total;
+            lineItemsSection.style.display = 'block';
         }
     </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 </body>
 
 </html>
