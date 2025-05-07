@@ -4,6 +4,8 @@ import pytesseract
 from PIL import Image
 from io import BytesIO
 import base64
+import json
+import re
 
 app = Flask(__name__)
 
@@ -17,32 +19,51 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 def upload_file():
     return render_template('index.html')
 
-
 @app.route('/process-cropped-image', methods=['POST'])
 def process_cropped_image():
-    data = request.get_json()
-    cropped_image_data = data['image']
+    if request.content_type == 'application/json':
+        try:
+            data = json.loads(request.data)
+            cropped_image_data = data['image']
+            
+            img_data = base64.b64decode(cropped_image_data.split(',')[1])
+            img = Image.open(BytesIO(img_data))
+            
+            text = pytesseract.image_to_string(img)
 
-    img_data = base64.b64decode(cropped_image_data.split(',')[1])
-    img = Image.open(BytesIO(img_data))
+            items = extract_items(text)
+            total = calculate_total(items)
 
-    text = pytesseract.image_to_string(img)
+            return jsonify({'items': items, 'total': total})
+        
+        except Exception as e:
+            return jsonify({'error': f'Failed to process image: {str(e)}'}), 500
 
-    items = extract_items(text)
-    total = extract_total(text)
-    
-    return jsonify({'items': items, 'total': total})
-
+    return jsonify({'error': 'Request body must be JSON'}), 400
 
 def extract_items(text):
-    items = text.split('\n')
-    return [item.strip() for item in items if item.strip() != '']
+    item_pattern = re.compile(r'(\d+)\s+([a-zA-Z\s]+)\s+(\$?\d+(\.\d{1,2})?)')
+    items = []
 
-def extract_total(text):
     lines = text.split('\n')
-    total_line = [line for line in lines if 'total' in line.lower()]
-    return total_line[-1] if total_line else 'Total not found'
+    for line in lines:
+        match = item_pattern.search(line)
+        if match:
+            quantity = int(match.group(1)) 
+            name = match.group(2).strip()
+            amount = float(match.group(3).replace('$', '').strip())
+            total_per_item = quantity * amount
+            items.append({
+                'quantity': quantity,
+                'name': name,
+                'amount': amount,
+                'total': total_per_item
+            })
 
+    return items
+
+def calculate_total(items):
+    return sum(item['total'] for item in items)
 
 if __name__ == "__main__":
     app.run(debug=True)

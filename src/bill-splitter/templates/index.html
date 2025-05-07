@@ -2,31 +2,80 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Receipt Scanner</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
     <style>
-        .upload-box {
-            width: 80%;
-            height: 300px;
-            border: 2px dashed #ccc;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            font-size: 18px;
-            color: #aaa;
-            margin-top: 20px;
+        body {
+            background-color: #f9f9f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .uploaded-image {
+        .upload-box {
             width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-            margin-top: 20px;
+            max-width: 500px;
+            height: 320px;
+            border: 2px dashed #6c63ff;
+            border-radius: 20px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            text-align: center;
+            color: #666;
+            position: relative;
+        }
+
+        .upload-box img {
+            width: 64px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-label {
+            font-weight: 500;
+            color: #6c63ff;
+            cursor: pointer;
+            border-bottom: 1px dotted #6c63ff;
+        }
+
+        .receipt-table-section {
+            display: none;
+            margin: 50px auto;
+            max-width: 900px;
+        }
+
+        .receipt-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .receipt-table th,
+        .receipt-table td {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        .receipt-table th {
+            background-color: #f2f2f2;
+            color: #444;
+        }
+
+        .receipt-total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: 600;
+            padding-top: 10px;
         }
 
         #cropper-popup {
@@ -38,82 +87,83 @@
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             display: none;
+            z-index: 1000;
         }
 
-        #line-items {
-            display: none;
-            margin-top: 20px;
-        }
-
-        #cropped-result {
-            display: none;
-            margin-top: 20px;
+        .uploaded-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">Receipt Scanner</h2>
+    <div class="upload-box" id="upload-box">
+        <label for="file-upload">
+            <img src="images/upload.png" alt="Upload Icon" />
+            <div>Drag & drop an image or <span class="upload-label">browse</span></div>
+        </label>
+        <input id="file-upload" type="file" name="receipt" accept="image/*" />
+    </div>
 
-        <div id="upload-box" class="upload-box">
-            Drag and drop an image or <input type="file" name="receipt" accept="image/*">
-        </div>
-
-
-        <div id="cropped-result" style="display: none;">
-            <h4>Extracted Text from Cropped Image:</h4>
-            <pre id="extracted-text"></pre>
-        </div>
-
-        <div id="line-items" style="display: none;">
-            <h4>Line Items:</h4>
-            <ul id="item-list"></ul>
-            <h5>Total Amount: <span id="total-amount"></span></h5>
+    <div class="receipt-table-section" id="line-items">
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>Qty</th>
+                    <th>Item</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="item-list">
+            </tbody>
+        </table>
+        <div class="receipt-total">
+            Total Amount: <span id="total-amount"></span>
         </div>
     </div>
 
     <div id="cropper-popup">
         <div class="text-center">
             <h4>Crop the Image to Focus on Food Items</h4>
-            <img id="uploaded-image" src="" class="uploaded-image" alt="Uploaded Image">
+            <img id="uploaded-image" src="" class="uploaded-image" alt="Uploaded Image" />
             <button id="crop-button" class="btn btn-success mt-3">Crop and Continue</button>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
         let cropper;
-        const fileInput = document.querySelector('input[type="file"]');
+        const fileInput = document.getElementById('file-upload');
         const uploadBox = document.getElementById('upload-box');
         const cropButton = document.getElementById('crop-button');
         const uploadedImage = document.getElementById('uploaded-image');
-        const imageContainer = document.getElementById('image-container');
-        const croppedResult = document.getElementById('cropped-result');
-        const extractedTextElement = document.getElementById('extracted-text');
-        const lineItemsSection = document.getElementById('line-items');
         const itemList = document.getElementById('item-list');
         const totalAmount = document.getElementById('total-amount');
+        const lineItemsSection = document.getElementById('line-items');
 
-        // Image upload and drag functionality
-        uploadBox.addEventListener('dragover', function (event) {
-            event.preventDefault();
+        uploadBox.addEventListener('dragover', e => {
+            e.preventDefault();
             uploadBox.classList.add('dragover');
         });
 
-        uploadBox.addEventListener('dragleave', function (event) {
+        uploadBox.addEventListener('dragleave', e => {
             uploadBox.classList.remove('dragover');
         });
 
-        uploadBox.addEventListener('drop', function (event) {
-            event.preventDefault();
+        uploadBox.addEventListener('drop', e => {
+            e.preventDefault();
             uploadBox.classList.remove('dragover');
-            const file = event.dataTransfer.files[0];
-            fileInput.files = event.dataTransfer.files;
+            const file = e.dataTransfer.files[0];
+            fileInput.files = e.dataTransfer.files;
             previewImage(file);
         });
 
-        fileInput.addEventListener('change', function (event) {
-            const file = event.target.files[0];
+        fileInput.addEventListener('change', e => {
+            const file = e.target.files[0];
             previewImage(file);
         });
 
@@ -122,17 +172,14 @@
             reader.onload = function (event) {
                 const imageUrl = event.target.result;
                 uploadedImage.src = imageUrl;
-
                 document.getElementById('cropper-popup').style.display = 'block';
 
-                if (cropper) {
-                    cropper.destroy();
-                }
+                if (cropper) cropper.destroy();
 
                 cropper = new Cropper(uploadedImage, {
                     aspectRatio: NaN,
                     viewMode: 1,
-                    autoCropArea: 0.5,
+                    autoCropArea: 0.8,
                     scalable: true,
                     zoomable: true
                 });
@@ -140,46 +187,41 @@
             reader.readAsDataURL(file);
         }
 
-        function getCroppedImage() {
-            const croppedCanvas = cropper.getCroppedCanvas();
-            return croppedCanvas.toDataURL('image/png'); 
-        }
-
-        cropButton.addEventListener('click', function () {
-            const croppedImage = getCroppedImage();
+       cropButton.addEventListener('click', function () {
+            const croppedImage = cropper.getCroppedCanvas().toDataURL('image/png');
 
             fetch('/process-cropped-image', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image: croppedImage })
             })
                 .then(response => response.json())
                 .then(data => {
-                    showLineItems(data.items, data.total);
+                    displayResults(data.items, data.total);
+                    uploadBox.style.display = 'none'; 
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+                .catch(error => console.error('Error:', error));
 
             document.getElementById('cropper-popup').style.display = 'none';
-            croppedResult.style.display = 'block'; 
         });
 
-        function showLineItems(items, total) {
-            itemList.innerHTML = ''; 
+
+        function displayResults(items, total) {
+            itemList.innerHTML = '';
             items.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item;
-                itemList.appendChild(li);
+                const row = document.createElement('tr');
+                row.innerHTML = `
+          <td>${item.quantity}</td>
+          <td>${item.name}</td>
+          <td>$${item.amount.toFixed(2)}</td>
+          <td>$${item.total.toFixed(2)}</td>
+        `;
+                itemList.appendChild(row);
             });
-            totalAmount.textContent = total;
+            totalAmount.textContent = `$${total.toFixed(2)}`;
             lineItemsSection.style.display = 'block';
         }
     </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 </body>
 
 </html>
