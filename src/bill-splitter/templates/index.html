@@ -1,28 +1,71 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Receipt Scanner</title>
+    <title>Receipt Splitter</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
     <style>
-        body {
-            background-color: #f9f9f9;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        header h1 {
+            color: #2a6fdb;
+            margin-bottom: 5px;
+        }
+
+        .tagline {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Upload Box */
         .upload-box {
-            max-width: 500px;
+            max-width: 600px;
             margin: 40px auto;
             padding: 30px;
             background: #fff;
-            border: 2px dashed #6c63ff;
-            border-radius: 20px;
+            border: 2px dashed #2a6fdb;
+            border-radius: 10px;
             text-align: center;
             color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .upload-box:hover {
+            background-color: #f9fbff;
+            border-color: #1d5ccc;
         }
 
         .upload-box img {
@@ -37,80 +80,166 @@
 
         .upload-label {
             font-weight: 500;
-            color: #6c63ff;
+            color: #2a6fdb;
             cursor: pointer;
-            border-bottom: 1px dotted #6c63ff;
+            border-bottom: 1px dotted #2a6fdb;
+            transition: all 0.3s ease;
         }
 
+        .upload-label:hover {
+            color: #1d5ccc;
+        }
+
+        /* Results Layout */
         .results-wrapper {
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
-            max-width: 1000px;
+            gap: 25px;
+            max-width: 1200px;
             margin: 40px auto;
-            gap: 2rem;
         }
 
         .receipt-table-section {
             flex: 1 1 60%;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
             display: none;
         }
 
+        .receipt-table-section h2 {
+            margin-bottom: 15px;
+            color: #2a6fdb;
+            font-size: 1.4rem;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .receipt-table-section h2:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background-color: #2a6fdb;
+            border-radius: 3px;
+        }
+
+        /* Fixed Receipt Table Styling */
         .receipt-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
+            /* This helps with consistent column widths */
         }
 
         .receipt-table th,
         .receipt-table td {
-            padding: 10px;
+            padding: 12px 15px;
             border-bottom: 1px solid #eee;
             text-align: left;
-            font-size: 14px;
-            vertical-align: top;
+            font-size: 0.95rem;
+            vertical-align: middle;
+            /* Ensures content aligns vertically */
         }
 
         .receipt-table th {
-            background: #f2f2f2;
+            background-color: #f5f7fa;
+            color: #555;
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+            /* Slightly darker border for headers */
+        }
+
+        /* Make sure all cells, including assigned cells, maintain their borders */
+        .receipt-table td.assigned-users {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            min-height: 45px;
+            /* Ensure minimum height for consistency */
+            height: 100%;
+            border-bottom: 1px solid #eee;
+            /* Explicitly set the bottom border */
+        }
+
+        /* Ensure the last row has borders too */
+        .receipt-table tr:last-child td {
+            border-bottom: 1px solid #eee;
         }
 
         .receipt-total {
             text-align: right;
             font-weight: 600;
-            margin-top: 10px;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #2a6fdb;
+            padding: 10px;
+            background-color: #f0f7ff;
+            border-radius: 5px;
         }
 
+        /* User Panel */
         .user-panel {
             flex: 1 1 30%;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
             display: none;
+        }
+
+        .user-panel h5 {
+            margin-bottom: 15px;
+            color: #2a6fdb;
+            font-size: 1.4rem;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .user-panel h5:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background-color: #2a6fdb;
+            border-radius: 3px;
         }
 
         .user-bubbles {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .bubble {
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             color: white;
-            font-size: 16px;
+            font-size: 1.2rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: grab;
             position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .bubble:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .bubble.plus {
+            background-color: #f0f0f0 !important;
+            color: #2a6fdb;
+            border: 2px dashed #2a6fdb;
         }
 
         .bubble.trashable:hover::after {
@@ -122,119 +251,208 @@
             background: #fff;
             border-radius: 50%;
             padding: 2px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             cursor: pointer;
         }
 
         .user-totals {
-            margin-top: 15px;
-            font-size: 14px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            background-color: #f5f7fa;
+            padding: 15px;
+            border-radius: 8px;
         }
 
+        .user-totals div {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .user-totals div:last-child {
+            border-bottom: none;
+        }
+
+        /* Bubble styling inside the table */
+        .assigned-users .bubble {
+            width: 35px;
+            height: 35px;
+            font-size: 0.8rem;
+            margin: 2px;
+            /* Add small margin for spacing between bubbles */
+        }
+
+        /* Ensure the container properly holds the bubbles */
+        .assigned-users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            min-height: 40px;
+            align-items: center;
+            padding: 5px 10px;
+            /* Add padding to prevent content from touching the borders */
+        }
+
+        /* Scan Another Button */
         .scan-another-btn {
             text-align: center;
-            margin-top: 30px;
+            margin: 30px auto;
             display: none;
         }
 
         .scan-another-btn button {
-            background: #dc3545;
+            background-color: #2a6fdb;
             border: none;
             color: #fff;
             font-weight: 500;
             padding: 12px 30px;
             border-radius: 8px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .assigned-users {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            min-height: 40px;
+        .scan-another-btn button:hover {
+            background-color: #1d5ccc;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         }
 
+        /* Cropper Popup */
         #cropper-popup {
             position: fixed;
-            top: 20%;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
             background: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
             display: none;
             z-index: 1000;
+            max-width: 90%;
+            width: 600px;
+        }
+
+        #cropper-popup h4 {
+            color: #2a6fdb;
+            margin-bottom: 20px;
         }
 
         .uploaded-image {
             width: 100%;
-            max-height: 300px;
+            max-height: 400px;
             object-fit: contain;
-            margin-top: 10px;
+            margin: 15px 0;
         }
 
+        #crop-button {
+            background-color: #2a6fdb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #crop-button:hover {
+            background-color: #1d5ccc;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Styles */
         @media screen and (max-width: 768px) {
             .results-wrapper {
                 flex-direction: column;
-                gap: 1.5rem;
             }
 
             .receipt-table-section,
             .user-panel {
                 width: 100%;
             }
+
+            .receipt-table {
+                font-size: 0.85rem;
+            }
+
+            .receipt-table th,
+            .receipt-table td {
+                padding: 8px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="upload-box" id="upload-box">
-        <label for="file-upload">
-            <img src="{{ url_for('static', filename='images/Mainicon.png') }}" alt="Upload Icon" />
-            <div>Drag & drop an image or <span class="upload-label">browse</span></div>
-        </label>
-        <input id="file-upload" type="file" name="receipt" accept="image/*" />
-    </div>
+    <div class="container">
+        <header>
+            <h1>Receipt Splitter</h1>
+            <p class="tagline">Split bills easily with friends and family</p>
+        </header>
 
-    <div class="results-wrapper">
-        <div class="receipt-table-section" id="line-items">
-            <table class="receipt-table">
-                <thead>
-                    <tr>
-                        <th>Qty</th>
-                        <th>Item</th>
-                        <th>Unit Price</th>
-                        <th>Total</th>
-                        <th>Assigned</th>
-                    </tr>
-                </thead>
-                <tbody id="item-list"></tbody>
-            </table>
-            <div class="receipt-total">Total Amount: <span id="total-amount"></span></div>
+        <div class="upload-box" id="upload-box">
+            <label for="file-upload">
+                <img src="{{ url_for('static', filename='images/Mainicon.png') }}" alt="Upload Icon" />
+                <div>Take a photo or upload your receipt</div>
+                <div>Drag & drop an image or <span class="upload-label">browse</span></div>
+            </label>
+            <input id="file-upload" type="file" name="receipt" accept="image/*" />
         </div>
 
-        <div class="user-panel" id="user-panel">
-            <h5>Assign Users</h5>
-            <div class="user-bubbles" id="user-bubbles"></div>
-            <div class="user-totals" id="user-totals"></div>
-        </div>
-    </div>
+        <div class="results-wrapper">
+            <div class="receipt-table-section" id="line-items">
+                <h2>Items</h2>
+                <table class="receipt-table">
+                    <thead>
+                        <tr>
+                            <th width="10%">Qty</th>
+                            <th width="40%">Item</th>
+                            <th width="15%">Unit Price</th>
+                            <th width="15%">Total</th>
+                            <th width="20%">Assigned</th>
+                        </tr>
+                    </thead>
+                    <tbody id="item-list">
+                        <!-- Items will be populated here -->
+                    </tbody>
+                </table>
+                <div class="receipt-total">Total Amount: <span id="total-amount"></span></div>
+            </div>
 
-    <div class="scan-another-btn" id="scan-again">
-        <button onclick="window.location.reload()">Scan Another Receipt</button>
+            <div class="user-panel" id="user-panel">
+                <h5>People</h5>
+                <div class="user-bubbles" id="user-bubbles"></div>
+                <div class="user-totals" id="user-totals"></div>
+            </div>
+        </div>
+
+        <div class="scan-another-btn" id="scan-again">
+            <button onclick="window.location.reload()">
+                <i class="fas fa-camera"></i> Scan Another Receipt
+            </button>
+        </div>
     </div>
 
     <div id="cropper-popup">
         <div class="text-center">
-            <h4>Crop the Image to Focus on Food Items</h4>
-            <img id="uploaded-image" class="uploaded-image" alt="Uploaded Image" />
-            <button id="crop-button" class="btn btn-success mt-3">Crop and Continue</button>
+            <h4>Adjust Receipt Image</h4>
+            <p>Crop the image to focus on the items and prices</p>
+            <img id="uploaded-image" class="uploaded-image" alt="Uploaded Receipt" />
+            <button id="crop-button" class="btn">
+                <i class="fas fa-crop"></i> Crop and Continue
+            </button>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
         let cropper;
-        const colors = ['#e74c3c', '#3498db', '#27ae60', '#9b59b6', '#e67e22', '#1abc9c', '#f39c12'];
+        const colors = ['#2a6fdb', '#e74c3c', '#27ae60', '#9b59b6', '#e67e22', '#1abc9c', '#f39c12'];
         const users = {};
         const assignments = {};
         const fileInput = document.getElementById('file-upload');
@@ -265,7 +483,7 @@
             userTotals.innerHTML = '';
             for (const [user, data] of Object.entries(users)) {
                 const div = document.createElement('div');
-                div.textContent = `${user}: $${data.total.toFixed(2)}`;
+                div.innerHTML = `<span>${user}</span><strong>$${data.total.toFixed(2)}</strong>`;
                 userTotals.appendChild(div);
             }
         }
@@ -314,12 +532,12 @@
                 row.id = `item-${i}`;
                 row.dataset.total = item.total;
                 row.innerHTML = `
-          <td>${item.quantity}</td>
-          <td>${item.name}</td>
-          <td>$${item.amount.toFixed(2)}</td>
-          <td>$${item.total.toFixed(2)}</td>
-          <td id="assigned-${i}" class="assigned-users" ondragover="event.preventDefault()" ondrop="addAssignment(${i}, event.dataTransfer.getData('user'))"></td>
-        `;
+                    <td>${item.quantity}</td>
+                    <td>${item.name}</td>
+                    <td>$${item.amount.toFixed(2)}</td>
+                    <td>$${item.total.toFixed(2)}</td>
+                    <td id="assigned-${i}" class="assigned-users" ondragover="event.preventDefault()" ondrop="addAssignment(${i}, event.dataTransfer.getData('user'))"></td>
+                `;
                 itemList.appendChild(row);
             });
             totalAmount.textContent = `$${total.toFixed(2)}`;
@@ -367,8 +585,7 @@
             addUser("ME");
             const plus = document.createElement('div');
             plus.className = 'bubble plus';
-            plus.textContent = '+';
-            plus.style.backgroundColor = '#999';
+            plus.innerHTML = '<i class="fas fa-plus"></i>';
             plus.addEventListener('click', () => {
                 const name = prompt("Enter full name:");
                 if (name && !users[name]) addUser(name);

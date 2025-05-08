@@ -19,6 +19,7 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 def upload_file():
     return render_template('index.html')
 
+# Process image that is cropped by the user
 @app.route('/process-cropped-image', methods=['POST'])
 def process_cropped_image():
     if request.content_type == 'application/json':
@@ -41,6 +42,7 @@ def process_cropped_image():
 
     return jsonify({'error': 'Request body must be JSON'}), 400
 
+# extraction of items using tesseract
 def extract_items(text):
     item_pattern = re.compile(r'(\d+)\s+([a-zA-Z\s]+)\s+(\$?\d+(\.\d{1,2})?)')
     items = []
