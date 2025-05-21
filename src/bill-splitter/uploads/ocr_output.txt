@@ -1,0 +1,66 @@
+--- ORIGINAL OCR TEXT ---
+3. Hickory BBQ Ribs-4. 24.95 24.98..
+“Local Rabbit M 18,95
+Chips 2.95
+_ | Farmer's Pasta 2 20 7 14.95
+~ 2. "Diet Kinnie oo 880 2.50
+
+~ 3 Pepsi: max oe 2.50 2.50 —
+Red Bul] i 3.50
+Large Sparkling water 3.75
+Large still water 3.75
+
+Pepsi , 2.50 -
+
+Scoop choc: 2,50 -
+
+
+--- LINE BY LINE ANALYSIS ---
+
+Line: '3. Hickory BBQ Ribs-4. 24.95 24.98..'
+  Result: No match with regex
+
+Line: '“Local Rabbit M 18,95'
+  Result: No match with regex
+
+Line: 'Chips 2.95'
+  Quantity: 1
+  Raw Name: 'Chips'
+  Cleaned Name: 'Chips'
+  Raw Price: 2.95
+  Processed Price: 2.95
+  Status: Successfully added
+
+Line: '_ | Farmer's Pasta 2 20 7 14.95'
+  Result: No match with regex
+
+Line: '~ 2. "Diet Kinnie oo 880 2.50'
+  Result: No match with regex
+
+Line: '~ 3 Pepsi: max oe 2.50 2.50 —'
+  Result: No match with regex
+
+Line: 'Red Bul] i 3.50'
+  Result: No match with regex
+
+Line: 'Large Sparkling water 3.75'
+  Quantity: 1
+  Raw Name: 'Large Sparkling water'
+  Cleaned Name: 'Large Sparkling water'
+  Raw Price: 3.75
+  Processed Price: 3.75
+  Status: Successfully added
+
+Line: 'Large still water 3.75'
+  Quantity: 1
+  Raw Name: 'Large still water'
+  Cleaned Name: 'Large still water'
+  Raw Price: 3.75
+  Processed Price: 3.75
+  Status: Successfully added
+
+Line: 'Pepsi , 2.50 -'
+  Result: No match with regex
+
+Line: 'Scoop choc: 2,50 -'
+  Result: No match with regex
