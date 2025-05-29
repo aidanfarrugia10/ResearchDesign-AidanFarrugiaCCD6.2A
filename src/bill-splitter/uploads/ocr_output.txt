@@ -1,21 +1,76 @@
 --- ORIGINAL OCR TEXT ---
-2 Fish nrger 5.8
-1 tang cng rey
-2° Saft ort ose
+4 ROSE RINE 2,90
+1 RED WINE 2.90
+4 WRITE WINE 2.90
+1 BIG RATER 3.00
+4 ITALIAN PLATTER 15.90
+4 LA VALLETTA RED. 12.50
+1 FALCON KERLOT. 13.00
+4 ROYAL BRACKLA 16 S.K 7.00
 
 
 --- LINE BY LINE ANALYSIS ---
 
-Line: '2 Fish nrger 5.8'
-  Quantity: 2
-  Raw Name: 'Fish nrger'
-  Cleaned Name: 'Fish nrger'
-  Raw Price: 5.8
-  Processed Price: 5.8
+Line: '4 ROSE RINE 2,90'
+  Quantity: 4
+  Raw Name: 'ROSE RINE'
+  Cleaned Name: 'ROSE RINE'
+  Raw Price: 2,90
+  Processed Price: 2.9
   Status: Successfully added
 
-Line: '1 tang cng rey'
-  Result: No match with regex
+Line: '1 RED WINE 2.90'
+  Quantity: 1
+  Raw Name: 'RED WINE'
+  Cleaned Name: 'RED WINE'
+  Raw Price: 2.90
+  Processed Price: 2.9
+  Status: Successfully added
 
-Line: '2° Saft ort ose'
-  Result: No match with regex
+Line: '4 WRITE WINE 2.90'
+  Quantity: 4
+  Raw Name: 'WRITE WINE'
+  Cleaned Name: 'WRITE WINE'
+  Raw Price: 2.90
+  Processed Price: 2.9
+  Status: Successfully added
+
+Line: '1 BIG RATER 3.00'
+  Quantity: 1
+  Raw Name: 'BIG RATER'
+  Cleaned Name: 'BIG RATER'
+  Raw Price: 3.00
+  Processed Price: 3.0
+  Status: Successfully added
+
+Line: '4 ITALIAN PLATTER 15.90'
+  Quantity: 4
+  Raw Name: 'ITALIAN PLATTER'
+  Cleaned Name: 'ITALIAN PLATTER'
+  Raw Price: 15.90
+  Processed Price: 15.9
+  Status: Successfully added
+
+Line: '4 LA VALLETTA RED. 12.50'
+  Quantity: 4
+  Raw Name: 'LA VALLETTA RED.'
+  Cleaned Name: 'LA VALLETTA RED.'
+  Raw Price: 12.50
+  Processed Price: 12.5
+  Status: Successfully added
+
+Line: '1 FALCON KERLOT. 13.00'
+  Quantity: 1
+  Raw Name: 'FALCON KERLOT.'
+  Cleaned Name: 'FALCON KERLOT.'
+  Raw Price: 13.00
+  Processed Price: 13.0
+  Status: Successfully added
+
+Line: '4 ROYAL BRACKLA 16 S.K 7.00'
+  Quantity: 4
+  Raw Name: 'ROYAL BRACKLA 16 S.K'
+  Cleaned Name: 'ROYAL BRACKLA 16 S.K'
+  Raw Price: 7.00
+  Processed Price: 7.0
+  Status: Successfully added
